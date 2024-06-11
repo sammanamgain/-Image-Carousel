@@ -1,4 +1,4 @@
-# Ball Simulation Project
+# Image Carousel
 
 ## Author
 
