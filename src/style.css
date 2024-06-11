@@ -21,7 +21,8 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-width: 600px;
+  max-width: 50%;
+  min-width: 600px;
   height: auto;
   width: 100%;
 }
