@@ -5,13 +5,15 @@ export class Carousel {
   private leftControl: HTMLElement;
   private rightControl: HTMLElement;
   private carouselIndicators: NodeListOf<HTMLElement>;
-  private interval: number;
-  private transitionTime: number;
+  private interval: number; // image will stop at this time
+  private transitionTime: number; // time to transition from one image to another
   private currentIndex: number = 0;
   private imageWidth: number;
-  private intervalId: number | null = null;
+
+  // to cancel the requestanimation
   private animationFrameId: number | null = null;
-  private pauseDuration: number = 1;
+
+  private isForward: boolean = true;
 
   constructor(
     carouselClass: string,
@@ -23,17 +25,6 @@ export class Carousel {
     carouselControlPrev: string,
     carouselControlNext: string
   ) {
-    console.log(
-      carouselClass,
-      carouselImageWrapperClass,
-      carouselImageClass,
-      carouselIndicatorClass,
-      interval,
-      transitionTime,
-      carouselControlPrev,
-      carouselControlNext
-    );
-
     this.carousel = document.querySelector(`.${carouselClass}`) as HTMLElement;
     this.imageWrapper = this.carousel.querySelector(
       `.${carouselImageWrapperClass}`
@@ -50,26 +41,26 @@ export class Carousel {
     this.rightControl = this.carousel.querySelector(
       `.${carouselControlNext}`
     ) as HTMLElement;
-    this.interval = interval;
+
     this.transitionTime = transitionTime;
 
     // Calculate image width based on the first image
     this.imageWidth = this.images[0].offsetWidth;
-    this.pauseDuration = this.pauseDuration * 1000;
+    this.interval = interval * 1000;
+  }
 
+  init() {
     this.addEventListeners();
     this.startAutoTransition(this.transitionTime);
   }
-
+  //  adding event listeners to the button ---left ,right and indicator buttons
   private addEventListeners() {
     this.leftControl.addEventListener("click", () => {
-      console.log("left button clicked");
       this.stopAutoTransition();
-      console.log(this.imageWrapper);
+
       this.moveLeft();
     });
     this.rightControl.addEventListener("click", () => {
-      console.log("right button clicked");
       this.stopAutoTransition();
       this.moveRight();
     });
@@ -77,44 +68,17 @@ export class Carousel {
       indicator.addEventListener("click", () => {
         console.log(`Indicator ${index} clicked`);
         this.stopAutoTransition();
-        this.showSlide(index, false); // Pass false to skip animation
+        this.showSlide(index); // Pass false to skip animation
       });
     });
   }
-  private showSlide(index: number, animate: boolean = true) {
+
+  private showSlide(index: number) {
     const targetPosition = -index * this.imageWidth;
 
-    if (animate) {
-      const startPosition = parseInt(this.imageWrapper.style.left || "0", 10);
-      const distance = targetPosition - startPosition;
-      const duration = this.transitionTime * 1000;
-      let startTime: number | null = null;
-
-      const step = (currentTime: number) => {
-        if (!startTime) {
-          startTime = currentTime;
-        }
-
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const newPosition = startPosition + distance * progress;
-
-        this.imageWrapper.style.left = `${newPosition}px`;
-
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        } else {
-          this.currentIndex = index;
-          this.updateActiveIndicator();
-        }
-      };
-
-      requestAnimationFrame(step);
-    } else {
-      this.imageWrapper.style.left = `${targetPosition}px`;
-      this.currentIndex = index;
-      this.updateActiveIndicator();
-    }
+    this.imageWrapper.style.left = `${targetPosition}px`;
+    this.currentIndex = index;
+    this.updateActiveIndicator();
   }
 
   private updateActiveIndicator() {
@@ -145,16 +109,10 @@ export class Carousel {
   }
 
   private startAutoTransition(transitionTime: number) {
-    this.intervalId = window.setInterval(() => {
-      this.animateToIndex(transitionTime);
-    }, this.pauseDuration + transitionTime * 1000);
+    this.animateToIndex(transitionTime);
   }
 
   private stopAutoTransition() {
-    if (this.intervalId !== null) {
-      window.clearInterval(this.intervalId);
-      this.intervalId = null;
-    }
     if (this.animationFrameId !== null) {
       window.cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
@@ -163,24 +121,26 @@ export class Carousel {
 
   private animateToIndex(transitionTime: number) {
     let nextIndex;
-    let isForward = true; // Track the direction of the carousel
-
+    // Track the direction of the carousel
+    console.log("currentIndex", this.currentIndex);
     if (this.currentIndex === this.images.length - 1) {
-      nextIndex = 0; // Transition to the first image after the last image
-      isForward = false; // Set the direction to backward
+      // Transition to the first image after the last image
+      this.isForward = false; // Set the direction to backward
     } else if (this.currentIndex === 0) {
-      nextIndex = 1; // Transition to the second image after the first image
-      isForward = true; // Set the direction to forward
-    } else {
-      nextIndex = isForward ? this.currentIndex + 1 : this.currentIndex - 1;
+      // Transition to the second image after the first image
+      this.isForward = true; // Set the direction to forward
     }
 
+    nextIndex = this.isForward ? this.currentIndex + 1 : this.currentIndex - 1;
+    console.log("nexindex", nextIndex);
+    // converting string to decimal
     const startPosition = parseInt(this.imageWrapper.style.left || "0", 10);
+    // endpostion is negative as we have to move to the left side
     const endPosition = -nextIndex * this.imageWidth;
     const distance = endPosition - startPosition;
     const duration = transitionTime * 1000;
     let startTime: number | null = null;
-
+    // currenttime is arguement that is provided by requesetAniamtion Frame
     const step = (currentTime: number) => {
       if (!startTime) {
         startTime = currentTime;
@@ -198,23 +158,18 @@ export class Carousel {
         this.currentIndex = nextIndex; // Update currentIndex after animation completes
 
         // Update active indicator
-        Array.from(this.carouselIndicators).forEach((indicator, index) => {
-          if (index === this.currentIndex) {
-            indicator.classList.add("carousel__indicator--active");
-          } else {
-            indicator.classList.remove("carousel__indicator--active");
-          }
-        });
+        this.updateActiveIndicator();
 
         // Continue the loop after the pause
         setTimeout(() => {
           this.animateToIndex(transitionTime);
-        }, this.pauseDuration);
+        }, this.interval);
       }
     };
 
     this.animationFrameId = requestAnimationFrame(step);
   }
+  // triggers when clicked on left and right button
   private moveToIndex() {
     console.log("move to index reached");
     const startPosition = parseInt(this.imageWrapper.style.left || "0", 10);
@@ -238,35 +193,10 @@ export class Carousel {
         requestAnimationFrame(step);
       } else {
         // Update active indicator
-        Array.from(this.carouselIndicators).forEach((indicator, index) => {
-          if (index === this.currentIndex) {
-            indicator.classList.add("carousel__indicator--active");
-          } else {
-            indicator.classList.remove("carousel__indicator--active");
-          }
-        });
+        this.updateActiveIndicator();
       }
     };
 
     requestAnimationFrame(step);
-  }
-
-  private animateScroll(targetPosition: number) {
-    const startTime = performance.now();
-    const startPosition = this.imageWrapper.scrollLeft;
-
-    const animate = (currentTime: number) => {
-      const elapsedTime = currentTime - startTime;
-      const progress = Math.min(elapsedTime / this.transitionTime, 1);
-      const newPosition =
-        startPosition + (targetPosition - startPosition) * progress;
-      this.imageWrapper.scrollLeft = newPosition;
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-
-    requestAnimationFrame(animate);
   }
 }

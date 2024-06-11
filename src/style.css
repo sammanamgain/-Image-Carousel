@@ -19,6 +19,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: white;
+  overflow: hidden;
 }
 .carousel {
   position: relative;
@@ -26,6 +28,7 @@ body {
   display: flex;
   flex-direction: column;
   max-width: 600px;
+  height: auto;
 }
 .carousel__image-wrapper {
   position: relative;

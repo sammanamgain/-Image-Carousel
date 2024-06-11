@@ -11,3 +11,4 @@ const carousel = new Carousel(
   "carousel__control--prev",
   "carousel__control--next"
 );
+carousel.init();
