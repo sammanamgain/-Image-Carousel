@@ -20,18 +20,23 @@ This is an image carousel built with HTML, CSS, and JavaScript. It allows you to
 
 1. Clone the repository:
 
-````bash
+```bash
 git clone https://github.com/your-username/image-carousel.git
 
+```
 
+2. Install the dependencies
 
-2 . Install the dependencies
 ```bash
 npm install
+```
 
 3. run the project
+
 ```bash
 npm run dev
+```
 
+```
 
-````
+```
