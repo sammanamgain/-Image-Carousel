@@ -125,10 +125,10 @@ export class Carousel {
     console.log("currentIndex", this.currentIndex);
     if (this.currentIndex === this.images.length - 1) {
       // Transition to the first image after the last image
-      this.isForward = false; // Set the direction to backward
+      this.isForward = false;
     } else if (this.currentIndex === 0) {
       // Transition to the second image after the first image
-      this.isForward = true; // Set the direction to forward
+      this.isForward = true;
     }
 
     nextIndex = this.isForward ? this.currentIndex + 1 : this.currentIndex - 1;
@@ -171,7 +171,6 @@ export class Carousel {
   }
   // triggers when clicked on left and right button
   private moveToIndex() {
-    console.log("move to index reached");
     const startPosition = parseInt(this.imageWrapper.style.left || "0", 10);
     const endPosition = -this.currentIndex * this.imageWidth;
     const distance = endPosition - startPosition;

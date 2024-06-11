@@ -37,18 +37,22 @@ body {
   object-fit: cover;
   height: 100%;
   width: 100%;
+  border-radius: 30px;
 }
 .carousel__control {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
+  background: none;
   border: none;
   color: white;
   font-size: 2rem;
   cursor: pointer;
   z-index: 1;
 }
+/* .carousel__control:hover {
+  transform: scale(1.1);
+} */
 .carousel__control--prev {
   left: 10px;
 }
@@ -62,15 +66,16 @@ body {
   align-items: center;
   width: 100%;
   background-color: grey;
+  border-radius: 30px;
 }
 .carousel__indicator {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   margin: 0 5px;
-  background-color: red;
+  background-color: white;
   border-radius: 50%;
   cursor: pointer;
 }
 .carousel__indicator--active {
-  background-color: blue;
+  background-color: green;
 }
